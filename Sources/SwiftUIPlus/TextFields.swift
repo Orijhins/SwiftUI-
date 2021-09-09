@@ -36,6 +36,19 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     ///OPTIONAL: The Delegate Action to execute when the BackTab Key is pressed
     public var onBackTabKeyStroke: (() -> Void)?
     @State fileprivate var didFocus = false
+    
+    public init(_ value: Binding<Value?>, formatter: Formatter? = nil, placeholder: String, autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>, onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil, onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil) {
+        self._value = value
+        self.formatter = formatter
+        self.placeholder = placeholder
+        self.autoFocus = autoFocus
+        self.tag = tag
+        self._focusTag = focusTag
+        self.onChange = onChange
+        self.onCommit = onCommit
+        self.onTabKeyStroke = onTabKeyStroke
+        self.onBackTabKeyStroke = onBackTabKeyStroke
+    }
 
     public func makeNSView(context: Context) -> NSTextField {
         let textField = NSTextField()
