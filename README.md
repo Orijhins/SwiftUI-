@@ -8,7 +8,7 @@ As awesome and easy to use SwiftUI is, it's still new and lacks some key Feature
 
 ## How to use SwiftUI++ ?
 
-To use this Package, simply add it with the Swift Package Manager with the Address https://github.com/Orijhins/SwuiftUI++ on the Master Branch. Once it's added, you can import it as SwiftUIPlus and use it.
+To use this Package, simply add it with the Swift Package Manager with the Address https://github.com/Orijhins/SwuiftUI- on the Main Branch. Once it's added, you can import it as SwiftUIPlus and use it.
 
 ## Contribute to SwiftUI++
 
