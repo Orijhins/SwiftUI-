@@ -1,16 +1,16 @@
-# SwiftUI++
+# SwiftUIPlus
 
 An extended Collection of SwiftUI Views.
 
-## Why SwiftUI++ ?
+## Why SwiftUIPlus ?
 
 As awesome and easy to use SwiftUI is, it's still new and lacks some key Features especially for macOS. This Package is an Attempt to fill the Gaps until SwiftUI offers full Support for the old NSViews and UIViews.
 
-## How to use SwiftUI++ ?
+## How to use SwiftUIPlus ?
 
-To use this Package, simply add it with the Swift Package Manager with the Address https://github.com/Orijhins/SwuiftUI- on the Main Branch. Once it's added, you can import it as SwiftUIPlus and use it.
+To use this Package, simply add it with the Swift Package Manager with the Address https://github.com/Orijhins/SwuiftUIPlus on the Main Branch. Once it's added, you can import it as SwiftUIPlus and use it.
 
-## Contribute to SwiftUI++
+## Contribute to SwiftUIPlus
 
 All Contributions are welcome. Fork it, upgrade it and feel free to open a Merge Request. But please try to respect some Guidelines:
 - Name your Files as `View` + s. For Example, if you're creating a new SwiftUI Label, call it Labels.
