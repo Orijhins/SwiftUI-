@@ -44,8 +44,33 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     public var onBackTabKeyStroke: (() -> Void)?
     @State fileprivate var didFocus = false
     
-    public init(_ value: Binding<Value?>, formatter: Formatter? = nil, placeholder: String, autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>, onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil, onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil) {
+    public init(
+        _ value: Binding<Value?>,
+        formatter: Formatter? = nil, placeholder: String,
+        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
+        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
+    ) {
         self._value = value
+        self.formatter = formatter
+        self.placeholder = placeholder
+        self.autoFocus = autoFocus
+        self.tag = tag
+        self._focusTag = focusTag
+        self.onChange = onChange
+        self.onCommit = onCommit
+        self.onTabKeyStroke = onTabKeyStroke
+        self.onBackTabKeyStroke = onBackTabKeyStroke
+    }
+    
+    public init(
+        _ value: Binding<Value>,
+        formatter: Formatter? = nil, placeholder: String,
+        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
+        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
+    ) {
+        self._value = Binding(value)
         self.formatter = formatter
         self.placeholder = placeholder
         self.autoFocus = autoFocus
@@ -149,6 +174,10 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                     parent.value = NSDecimalNumber(string: fieldEditor.string) as? Value
                 case is Int:
                     parent.value = Int(fieldEditor.string) as? Value
+                case is Int32:
+                    parent.value = Int32(fieldEditor.string) as? Value
+                case is Int16:
+                    parent.value = Int16(fieldEditor.string) as? Value
                 case is Float:
                     parent.value = Float(fieldEditor.string) as? Value
                 default:
