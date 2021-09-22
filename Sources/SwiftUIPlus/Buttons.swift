@@ -33,7 +33,11 @@ public struct PlusIconButton: View {
     public var body: some View {
         Button(action: action) {
             #if os(iOS)
-            Label(label, image: icon)
+            if #available(iOS 14.0, *) {
+                Label(label, image: icon)
+            } else {
+                Image(uiImage: UIImage(named: icon) ?? UIImage())
+            }
             #else
             if #available(macOS 11.0, *) {
                 Label(label, systemImage: icon)

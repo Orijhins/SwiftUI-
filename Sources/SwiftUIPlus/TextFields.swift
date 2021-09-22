@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 // MARK: PlusTextField
-
+#if os(macOS)
 /**
  A TextField that accepts any Kind of Value and allows the User to cycle
  through the View with the Tab and BackTab Keys.
@@ -200,3 +200,4 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         }
     }
 }
+#endif

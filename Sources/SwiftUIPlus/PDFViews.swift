@@ -5,11 +5,14 @@
 //  Created by Orijhins on 22/09/2021.
 //
 
-import Foundation
 import SwiftUI
 import PDFKit
 
+#if os(macOS)
 @available(macOS 10.15, *)
+@available(iOS, unavailable)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
 public struct PlusPDFView: NSViewRepresentable {
     private var data: Data?
     private let autoScales: Bool
@@ -32,8 +35,11 @@ public struct PlusPDFView: NSViewRepresentable {
         //
     }
 }
-
+#else
 @available(iOS 13.0, *)
+@available(macOS, unavailable)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
 public struct UIPlusPDFView: UIViewRepresentable {
     private var data: Data?
     private let autoScales: Bool
@@ -56,3 +62,4 @@ public struct UIPlusPDFView: UIViewRepresentable {
         //
     }
 }
+#endif
