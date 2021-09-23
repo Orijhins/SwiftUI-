@@ -42,12 +42,16 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     public var onTabKeyStroke: (() -> Void)?
     ///OPTIONAL: The Delegate Action to execute when the BackTab Key is pressed
     public var onBackTabKeyStroke: (() -> Void)?
+    ///OPTIONAL: The Autocompletions to display to the User
+    public private(set) var completions: ([Any]?, KeyPath<Any, Value>?)
+    
     @State fileprivate var didFocus = false
     
     public init(
         _ value: Binding<Value?>,
         formatter: Formatter? = nil, placeholder: String,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        completions: ([Any]?, KeyPath<Any, Value>?) = (nil, nil),
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
@@ -57,6 +61,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
+        self.completions = completions
         self.onChange = onChange
         self.onCommit = onCommit
         self.onTabKeyStroke = onTabKeyStroke
@@ -93,6 +98,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         textField.delegate = context.coordinator
         textField.tag = tag
         textField.bezelStyle = .roundedBezel
+        textField.isAutomaticTextCompletionEnabled = completions.0 != nil && completions.1 != nil
         return textField
     }
 
@@ -197,6 +203,18 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                 return true
             }
             return false
+        }
+        
+        public func textField(_ textField: NSTextField, textView: NSTextView, candidatesForSelectedRange selectedRange: NSRange) -> [Any]? {
+            guard let keyPath = parent.completions.1,
+                  let completions = parent.completions.0 else {
+                return nil
+            }
+            return completions.map { $0[keyPath: keyPath] }.filter { $0 == parent.value }
+        }
+        
+        public func textField(_ textField: NSTextField, textView: NSTextView, shouldSelectCandidateAt index: Int) -> Bool {
+            return true
         }
     }
 }
