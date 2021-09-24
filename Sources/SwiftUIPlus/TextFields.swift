@@ -15,7 +15,7 @@ import SwiftUI
  through the View with the Tab and BackTab Keys.
  */
 @available(macOS 10.15, *)
-public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
+public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Hashable, Element: Any {
     public typealias NSViewType = NSTextField
 
     ///The Value hold and displayed by the TextField
@@ -43,7 +43,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     ///OPTIONAL: The Delegate Action to execute when the BackTab Key is pressed
     public var onBackTabKeyStroke: (() -> Void)?
     ///OPTIONAL: The Autocompletions to display to the User
-    public private(set) var completions: ([Any]?, KeyPath<Any, Value>?)
+    public private(set) var completions: ([Element], KeyPath<Element, Value>)?
     
     @State fileprivate var didFocus = false
     
@@ -51,7 +51,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         _ value: Binding<Value?>,
         formatter: Formatter? = nil, placeholder: String,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
-        completions: ([Any]?, KeyPath<Any, Value>?) = (nil, nil),
+        completions: ([Element], KeyPath<Element, Value>)? = nil,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
@@ -72,6 +72,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         _ value: Binding<Value>,
         formatter: Formatter? = nil, placeholder: String,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        completions: ([Element], KeyPath<Element, Value>)? = nil,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
@@ -81,6 +82,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
+        self.completions = completions
         self.onChange = onChange
         self.onCommit = onCommit
         self.onTabKeyStroke = onTabKeyStroke
@@ -98,7 +100,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         textField.delegate = context.coordinator
         textField.tag = tag
         textField.bezelStyle = .roundedBezel
-        textField.isAutomaticTextCompletionEnabled = completions.0 != nil && completions.1 != nil
+        textField.isAutomaticTextCompletionEnabled = completions?.0 != nil && completions?.1 != nil
         return textField
     }
 
@@ -134,9 +136,9 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     // MARK: Coordinator
     
     public class Coordinator: NSObject, NSTextFieldDelegate {
-        var parent: PlusTextField<Value>
+        var parent: PlusTextField<Value, Element>
 
-        init(with parent: PlusTextField<Value>) {
+        init(with parent: PlusTextField<Value, Element>) {
             self.parent = parent
             super.init()
 
@@ -206,11 +208,11 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         }
         
         public func textField(_ textField: NSTextField, textView: NSTextView, candidatesForSelectedRange selectedRange: NSRange) -> [Any]? {
-            guard let keyPath = parent.completions.1,
-                  let completions = parent.completions.0 else {
+            guard let keyPath = parent.completions?.1,
+                  let completions = parent.completions?.0 else {
                 return nil
             }
-            return completions.map { $0[keyPath: keyPath] }.filter { $0 == parent.value }
+            return completions.map { $0[keyPath: keyPath] }.filter { $0 == parent.value } as [Any]
         }
         
         public func textField(_ textField: NSTextField, textView: NSTextView, shouldSelectCandidateAt index: Int) -> Bool {
