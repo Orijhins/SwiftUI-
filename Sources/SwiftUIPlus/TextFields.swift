@@ -51,7 +51,48 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
         _ value: Binding<Value?>,
         formatter: Formatter? = nil, placeholder: String,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
-        completions: ([Element], KeyPath<Element, Value>)? = nil,
+        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
+        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
+    ) {
+        self._value = value
+        self.formatter = formatter
+        self.placeholder = placeholder
+        self.autoFocus = autoFocus
+        self.tag = tag
+        self._focusTag = focusTag
+        self.completions = nil
+        self.onChange = onChange
+        self.onCommit = onCommit
+        self.onTabKeyStroke = onTabKeyStroke
+        self.onBackTabKeyStroke = onBackTabKeyStroke
+    }
+    
+    public init(
+        _ value: Binding<Value>,
+        formatter: Formatter? = nil, placeholder: String,
+        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
+        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
+    ) {
+        self._value = Binding(value)
+        self.formatter = formatter
+        self.placeholder = placeholder
+        self.autoFocus = autoFocus
+        self.tag = tag
+        self._focusTag = focusTag
+        self.completions = nil
+        self.onChange = onChange
+        self.onCommit = onCommit
+        self.onTabKeyStroke = onTabKeyStroke
+        self.onBackTabKeyStroke = onBackTabKeyStroke
+    }
+    
+    ///Create a PlusTextField with Autocompletion enabled
+    public init(
+        _ value: Binding<Value?>,
+        formatter: Formatter? = nil, placeholder: String,
+        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        completions: ([Element], KeyPath<Element, Value>),
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
@@ -68,11 +109,12 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
         self.onBackTabKeyStroke = onBackTabKeyStroke
     }
     
+    ///Create a PlusTextField with Autocompletion enabled
     public init(
         _ value: Binding<Value>,
         formatter: Formatter? = nil, placeholder: String,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
-        completions: ([Element], KeyPath<Element, Value>)? = nil,
+        completions: ([Element], KeyPath<Element, Value>),
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
