@@ -15,7 +15,7 @@ import SwiftUI
  through the View with the Tab and BackTab Keys.
  */
 @available(macOS 10.15, *)
-public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Hashable, Element: Any {
+public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     public typealias NSViewType = NSTextField
 
     ///The Value hold and displayed by the TextField
@@ -42,8 +42,6 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
     public var onTabKeyStroke: (() -> Void)?
     ///OPTIONAL: The Delegate Action to execute when the BackTab Key is pressed
     public var onBackTabKeyStroke: (() -> Void)?
-    ///OPTIONAL: The Autocompletions to display to the User
-    public private(set) var completions: ([Element], KeyPath<Element, Value>)?
     
     @State fileprivate var didFocus = false
     
@@ -60,7 +58,6 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
-        self.completions = nil
         self.onChange = onChange
         self.onCommit = onCommit
         self.onTabKeyStroke = onTabKeyStroke
@@ -80,51 +77,6 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
-        self.completions = nil
-        self.onChange = onChange
-        self.onCommit = onCommit
-        self.onTabKeyStroke = onTabKeyStroke
-        self.onBackTabKeyStroke = onBackTabKeyStroke
-    }
-    
-    ///Create a PlusTextField with Autocompletion enabled
-    public init(
-        _ value: Binding<Value?>,
-        formatter: Formatter? = nil, placeholder: String,
-        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
-        completions: ([Element], KeyPath<Element, Value>),
-        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
-        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
-    ) {
-        self._value = value
-        self.formatter = formatter
-        self.placeholder = placeholder
-        self.autoFocus = autoFocus
-        self.tag = tag
-        self._focusTag = focusTag
-        self.completions = completions
-        self.onChange = onChange
-        self.onCommit = onCommit
-        self.onTabKeyStroke = onTabKeyStroke
-        self.onBackTabKeyStroke = onBackTabKeyStroke
-    }
-    
-    ///Create a PlusTextField with Autocompletion enabled
-    public init(
-        _ value: Binding<Value>,
-        formatter: Formatter? = nil, placeholder: String,
-        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
-        completions: ([Element], KeyPath<Element, Value>),
-        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
-        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
-    ) {
-        self._value = Binding(value)
-        self.formatter = formatter
-        self.placeholder = placeholder
-        self.autoFocus = autoFocus
-        self.tag = tag
-        self._focusTag = focusTag
-        self.completions = completions
         self.onChange = onChange
         self.onCommit = onCommit
         self.onTabKeyStroke = onTabKeyStroke
@@ -142,11 +94,14 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
         textField.delegate = context.coordinator
         textField.tag = tag
         textField.bezelStyle = .roundedBezel
-        textField.isAutomaticTextCompletionEnabled = completions?.0 != nil && completions?.1 != nil
         return textField
     }
 
     public func updateNSView(_ nsView: NSTextField, context: Context) {
+        nsView.stringValue =
+            formatter != nil
+                ? formatter!.string(for: value) ?? ""
+                : (value != nil ? "\(value!)" : "")
         if autoFocus && !didFocus {
             NSApplication.shared.mainWindow?.perform(
                 #selector(NSApplication.shared.mainWindow?.makeFirstResponder(_:)),
@@ -178,9 +133,9 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
     // MARK: Coordinator
     
     public class Coordinator: NSObject, NSTextFieldDelegate {
-        var parent: PlusTextField<Value, Element>
+        var parent: PlusTextField<Value>
 
-        init(with parent: PlusTextField<Value, Element>) {
+        init(with parent: PlusTextField<Value>) {
             self.parent = parent
             super.init()
 
@@ -202,11 +157,19 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
         // MARK: NSTextFieldDelegate
         
         public func controlTextDidChange(_ obj: Notification) {
-            guard (obj.object as? NSTextField) != nil else { return }
+            guard let textField = obj.object as? NSTextField else { return }
+            updateValue(from: textField.stringValue)
             parent.onChange?()
         }
 
         public func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
+            print(fieldEditor)
+            updateValue(from: fieldEditor.string)
+            parent.onCommit?()
+            return true
+        }
+        
+        private func updateValue(from string: String) {
             if let form = parent.formatter {
                 let _tar_pointer = UnsafeMutablePointer<AnyObject>.allocate(capacity: 1)
                 let _err_pointer = UnsafeMutablePointer<NSString>.allocate(capacity: 1)
@@ -216,26 +179,24 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
                 }
                 let tar: AutoreleasingUnsafeMutablePointer<AnyObject?>? = AutoreleasingUnsafeMutablePointer(_tar_pointer)
                 let error: AutoreleasingUnsafeMutablePointer<NSString?>? = AutoreleasingUnsafeMutablePointer(_err_pointer)
-                form.getObjectValue(tar, for: fieldEditor.string, errorDescription: error)
+                form.getObjectValue(tar, for: string, errorDescription: error)
                 parent.value = tar?.pointee as? Value
             } else {
                 switch parent.value {
                 case is NSDecimalNumber:
-                    parent.value = NSDecimalNumber(string: fieldEditor.string) as? Value
+                    parent.value = NSDecimalNumber(string: string) as? Value
                 case is Int:
-                    parent.value = Int(fieldEditor.string) as? Value
+                    parent.value = Int(string) as? Value
                 case is Int32:
-                    parent.value = Int32(fieldEditor.string) as? Value
+                    parent.value = Int32(string) as? Value
                 case is Int16:
-                    parent.value = Int16(fieldEditor.string) as? Value
+                    parent.value = Int16(string) as? Value
                 case is Float:
-                    parent.value = Float(fieldEditor.string) as? Value
+                    parent.value = Float(string) as? Value
                 default:
-                    parent.value = fieldEditor.string as? Value
+                    parent.value = string as? Value
                 }
             }
-            parent.onCommit?()
-            return true
         }
 
         public func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
@@ -249,17 +210,17 @@ public struct PlusTextField<Value, Element>: NSViewRepresentable where Value: Ha
             return false
         }
         
-        public func textField(_ textField: NSTextField, textView: NSTextView, candidatesForSelectedRange selectedRange: NSRange) -> [Any]? {
-            guard let keyPath = parent.completions?.1,
-                  let completions = parent.completions?.0 else {
-                return nil
-            }
-            return completions.map { $0[keyPath: keyPath] }.filter { $0 == parent.value } as [Any]
-        }
-        
-        public func textField(_ textField: NSTextField, textView: NSTextView, shouldSelectCandidateAt index: Int) -> Bool {
-            return true
-        }
+//        public func textField(_ textField: NSTextField, textView: NSTextView, candidatesForSelectedRange selectedRange: NSRange) -> [Any]? {
+//            guard let keyPath = parent.completions?.1,
+//                  let completions = parent.completions?.0 else {
+//                return nil
+//            }
+//            return completions.map { $0[keyPath: keyPath] }.filter { $0 == parent.value } as [Any]
+//        }
+//
+//        public func textField(_ textField: NSTextField, textView: NSTextView, shouldSelectCandidateAt index: Int) -> Bool {
+//            return true
+//        }
     }
 }
 #endif
