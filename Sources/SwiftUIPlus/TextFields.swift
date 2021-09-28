@@ -163,7 +163,6 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         }
 
         public func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
-            print(fieldEditor)
             updateValue(from: fieldEditor.string)
             parent.onCommit?()
             return true
