@@ -98,10 +98,6 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     }
 
     public func updateNSView(_ nsView: NSTextField, context: Context) {
-        nsView.stringValue =
-            formatter != nil
-                ? formatter!.string(for: value) ?? ""
-                : (value != nil ? "\(value!)" : "")
         if autoFocus && !didFocus {
             NSApplication.shared.mainWindow?.perform(
                 #selector(NSApplication.shared.mainWindow?.makeFirstResponder(_:)),
@@ -123,6 +119,17 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
             DispatchQueue.main.asyncAfter(deadline: .now() + .nanoseconds(1)) {
                 self.focusTag = 0
             }
+        }
+        if let formatter = formatter {
+            guard nsView.stringValue != formatter.string(for: value) else {
+                return
+            }
+            nsView.stringValue = formatter.string(for: value) ?? ""
+        } else {
+            guard nsView.stringValue != value as? String ?? "" else {
+                return
+            }
+            nsView.stringValue = value != nil ? "\(value!)" : ""
         }
     }
 
