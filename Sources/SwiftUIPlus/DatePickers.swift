@@ -1,28 +1,23 @@
 //
-//  TextFields.swift
-//  TextFields
+//  DatePickers.swift
+//  DatePickers
 //
-//  Created by Orijhins on 09/09/2021.
+//  Created by Orijhins on 29/09/2021.
 //
 
 import Foundation
 import SwiftUI
 
-// MARK: PlusTextField
 #if os(macOS)
-/**
- A TextField that accepts any Kind of Value and allows the User to cycle
- through the View with the Tab and BackTab Keys.
- */
 @available(macOS 10.15, *)
-public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
-    public typealias NSViewType = NSTextField
-
+public struct PlusDatePicker: NSViewRepresentable {
+    public typealias NSViewType = NSDatePicker
+    
     ///The Value hold and displayed by the TextField
-    @Binding public var value: Value?
+    @Binding public var value: Date
     ///OPTIONAL: The Formatter used by the TextField if necessary.
     ///Highly recommended if using non-StringProtocol Value
-    public var formatter: Formatter?
+    public var formatter: DateFormatter?
     ///The Placeholder to display if the Value is empty
     public var placeholder: String
     ///OPTIONAL: Set this to true if you want the TextField to be autofocused
@@ -46,8 +41,8 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     @State fileprivate var didFocus = false
     
     public init(
-        _ value: Binding<Value?>,
-        formatter: Formatter? = nil, placeholder: String,
+        _ value: Binding<Date>,
+        formatter: DateFormatter? = nil, placeholder: String,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
@@ -64,40 +59,18 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         self.onBackTabKeyStroke = onBackTabKeyStroke
     }
     
-    public init(
-        _ value: Binding<Value>,
-        formatter: Formatter? = nil, placeholder: String,
-        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
-        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
-        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
-    ) {
-        self._value = Binding(value)
-        self.formatter = formatter
-        self.placeholder = placeholder
-        self.autoFocus = autoFocus
-        self.tag = tag
-        self._focusTag = focusTag
-        self.onChange = onChange
-        self.onCommit = onCommit
-        self.onTabKeyStroke = onTabKeyStroke
-        self.onBackTabKeyStroke = onBackTabKeyStroke
+    public func makeNSView(context: Context) -> NSDatePicker {
+        let picker = NSDatePicker()
+        picker.dateValue = value
+        picker.formatter = formatter
+        picker.delegate = context.coordinator
+        picker.tag = tag
+        picker.isBezeled = true
+        picker.maxDate = Date()
+        return picker
     }
-
-    public func makeNSView(context: Context) -> NSTextField {
-        let textField = NSTextField()
-        textField.stringValue =
-            formatter != nil
-                ? formatter!.string(for: value) ?? ""
-                : (value != nil ? "\(value!)" : "")
-        textField.formatter = formatter
-        textField.placeholderString = placeholder
-        textField.delegate = context.coordinator
-        textField.tag = tag
-        textField.bezelStyle = .roundedBezel
-        return textField
-    }
-
-    public func updateNSView(_ nsView: NSTextField, context: Context) {
+    
+    public func updateNSView(_ nsView: NSDatePicker, context: Context) {
         if autoFocus && !didFocus {
             NSApplication.shared.mainWindow?.perform(
                 #selector(NSApplication.shared.mainWindow?.makeFirstResponder(_:)),
@@ -120,29 +93,22 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                 self.focusTag = 0
             }
         }
-        if let formatter = formatter {
-            guard nsView.stringValue != formatter.string(for: value) else {
-                return
-            }
-            nsView.stringValue = formatter.string(for: value) ?? ""
-        } else {
-            guard nsView.stringValue != value as? String ?? "" else {
-                return
-            }
-            nsView.stringValue = value != nil ? "\(value!)" : ""
+        guard nsView.dateValue != value else {
+            return
         }
+        nsView.dateValue = value
     }
-
+    
     public func makeCoordinator() -> Coordinator {
         Coordinator(with: self)
     }
     
     // MARK: Coordinator
     
-    public class Coordinator: NSObject, NSTextFieldDelegate {
-        var parent: PlusTextField<Value>
+    public class Coordinator: NSObject, NSDatePickerCellDelegate {
+        var parent: PlusDatePicker
 
-        init(with parent: PlusTextField<Value>) {
+        init(with parent: PlusDatePicker) {
             self.parent = parent
             super.init()
 
@@ -187,22 +153,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                 let error: AutoreleasingUnsafeMutablePointer<NSString?>? = AutoreleasingUnsafeMutablePointer(_err_pointer)
                 form.getObjectValue(tar, for: string, errorDescription: error)
                 if error == nil {
-                    parent.value = tar?.pointee as? Value
-                }
-            } else {
-                switch parent.value {
-                case is NSDecimalNumber:
-                    parent.value = NSDecimalNumber(string: string) as? Value
-                case is Int:
-                    parent.value = Int(string) as? Value
-                case is Int32:
-                    parent.value = Int32(string) as? Value
-                case is Int16:
-                    parent.value = Int16(string) as? Value
-                case is Float:
-                    parent.value = Float(string) as? Value
-                default:
-                    parent.value = string as? Value
+                    parent.value = tar?.pointee as? Date ?? Date()
                 }
             }
         }
