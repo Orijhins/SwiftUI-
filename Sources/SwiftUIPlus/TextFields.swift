@@ -186,7 +186,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                 let tar: AutoreleasingUnsafeMutablePointer<AnyObject?>? = AutoreleasingUnsafeMutablePointer(_tar_pointer)
                 let error: AutoreleasingUnsafeMutablePointer<NSString?>? = AutoreleasingUnsafeMutablePointer(_err_pointer)
                 form.getObjectValue(tar, for: string, errorDescription: error)
-                if error == nil {
+                if error?.pointee == nil {
                     parent.value = tar?.pointee as? Value
                 }
             } else {

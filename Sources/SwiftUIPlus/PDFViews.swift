@@ -18,21 +18,28 @@ import PDFKit
  */
 public struct PlusPDFView: NSViewRepresentable {
     ///The Data to display in the PDFView
-    public private(set) var data: Data?
+    public private(set) var document: PDFDocument?
     ///OPTIONAL: If the displayed PDF should autoscale. Default is true
     public let autoScales: Bool
     
     public init(_ data: Data?, autoScales: Bool = true) {
-        self.data = data
+        if let data = data {
+            self.document = PDFDocument(data: data)
+        } else {
+            self.document = PDFDocument()
+        }
+        self.autoScales = autoScales
+    }
+    
+    public init(_ document: PDFDocument, autoScales: Bool = true) {
+        self.document = document
         self.autoScales = autoScales
     }
     
     public func makeNSView(context: Context) -> PDFView {
         let pdfView = PDFView()
         pdfView.autoScales = autoScales
-        if let data = data {
-            pdfView.document = PDFDocument(data: data)
-        }
+        pdfView.document = document
         return pdfView
     }
     
