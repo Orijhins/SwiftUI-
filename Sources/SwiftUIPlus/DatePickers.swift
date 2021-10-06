@@ -15,11 +15,6 @@ public struct PlusDatePicker: NSViewRepresentable {
     
     ///The Value hold and displayed by the TextField
     @Binding public var value: Date
-    ///OPTIONAL: The Formatter used by the TextField if necessary.
-    ///Highly recommended if using non-StringProtocol Value
-    public var formatter: DateFormatter?
-    ///The Placeholder to display if the Value is empty
-    public var placeholder: String
     ///OPTIONAL: Set this to true if you want the TextField to be autofocused
     ///when the View is displayed or becomes active. Default is false
     public var autoFocus = false
@@ -31,8 +26,6 @@ public struct PlusDatePicker: NSViewRepresentable {
     @Binding public var focusTag: Int
     ///OPTIONAL: The Delegate Action to execute whenever the Value changes
     public var onChange: (() -> Void)?
-    ///OPTIONAL: The Delegate Action to execute when Editing ends
-    public var onCommit: (() -> Void)?
     ///OPTIONAL: The Delegate Action to execute when the Tab Key is pressed
     public var onTabKeyStroke: (() -> Void)?
     ///OPTIONAL: The Delegate Action to execute when the BackTab Key is pressed
@@ -42,19 +35,30 @@ public struct PlusDatePicker: NSViewRepresentable {
     
     public init(
         _ value: Binding<Date>,
-        formatter: DateFormatter? = nil, placeholder: String,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
-        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
+        onChange: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
         self._value = value
-        self.formatter = formatter
-        self.placeholder = placeholder
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
         self.onChange = onChange
-        self.onCommit = onCommit
+        self.onTabKeyStroke = onTabKeyStroke
+        self.onBackTabKeyStroke = onBackTabKeyStroke
+    }
+    
+    public init(
+        _ value: Binding<Date?>,
+        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        onChange: (() -> Void)? = nil,
+        onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
+    ) {
+        self._value = Binding(value)!
+        self.autoFocus = autoFocus
+        self.tag = tag
+        self._focusTag = focusTag
+        self.onChange = onChange
         self.onTabKeyStroke = onTabKeyStroke
         self.onBackTabKeyStroke = onBackTabKeyStroke
     }
@@ -62,7 +66,9 @@ public struct PlusDatePicker: NSViewRepresentable {
     public func makeNSView(context: Context) -> NSDatePicker {
         let picker = NSDatePicker()
         picker.dateValue = value
-        picker.formatter = formatter
+        picker.datePickerElements = .yearMonthDay
+        picker.layer?.cornerRadius = 10
+        picker.layer?.masksToBounds = true
         picker.delegate = context.coordinator
         picker.tag = tag
         picker.isBezeled = true
@@ -127,35 +133,11 @@ public struct PlusDatePicker: NSViewRepresentable {
             }
         }
 
-        // MARK: NSTextFieldDelegate
+        // MARK: NSDatePickerCellDelegate
         
-        public func controlTextDidChange(_ obj: Notification) {
-            guard let textField = obj.object as? NSTextField else { return }
-            updateValue(from: textField.stringValue)
+        public func datePickerCell(_ datePickerCell: NSDatePickerCell, validateProposedDateValue proposedDateValue: AutoreleasingUnsafeMutablePointer<NSDate>, timeInterval proposedTimeInterval: UnsafeMutablePointer<TimeInterval>?) {
+            parent.value = proposedDateValue.pointee as Date
             parent.onChange?()
-        }
-
-        public func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
-            updateValue(from: fieldEditor.string)
-            parent.onCommit?()
-            return true
-        }
-        
-        private func updateValue(from string: String) {
-            if let form = parent.formatter {
-                let _tar_pointer = UnsafeMutablePointer<AnyObject>.allocate(capacity: 1)
-                let _err_pointer = UnsafeMutablePointer<NSString>.allocate(capacity: 1)
-                defer {
-                    _tar_pointer.deallocate()
-                    _err_pointer.deallocate()
-                }
-                let tar: AutoreleasingUnsafeMutablePointer<AnyObject?>? = AutoreleasingUnsafeMutablePointer(_tar_pointer)
-                let error: AutoreleasingUnsafeMutablePointer<NSString?>? = AutoreleasingUnsafeMutablePointer(_err_pointer)
-                form.getObjectValue(tar, for: string, errorDescription: error)
-                if error == nil {
-                    parent.value = tar?.pointee as? Date ?? Date()
-                }
-            }
         }
 
         public func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
