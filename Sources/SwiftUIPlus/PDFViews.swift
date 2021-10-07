@@ -44,7 +44,7 @@ public struct PlusPDFView: NSViewRepresentable {
     }
     
     public func updateNSView(_ nsView: PDFView, context: Context) {
-        //
+        nsView.document = document
     }
 }
 #else
