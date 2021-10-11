@@ -14,7 +14,7 @@ public struct PlusDatePicker: NSViewRepresentable {
     public typealias NSViewType = NSDatePicker
     
     ///The Value hold and displayed by the TextField
-    @Binding public var value: Date
+    @Binding public var value: Date?
     ///OPTIONAL: Set this to true if you want the TextField to be autofocused
     ///when the View is displayed or becomes active. Default is false
     public var autoFocus = false
@@ -39,7 +39,7 @@ public struct PlusDatePicker: NSViewRepresentable {
         onChange: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
-        self._value = value
+        self._value = Binding(value)
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
@@ -54,7 +54,7 @@ public struct PlusDatePicker: NSViewRepresentable {
         onChange: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
-        self._value = Binding(value)!
+        self._value = value
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
@@ -64,8 +64,9 @@ public struct PlusDatePicker: NSViewRepresentable {
     }
     
     public func makeNSView(context: Context) -> NSDatePicker {
+        value = value != nil ? value : Date()
         let picker = NSDatePicker()
-        picker.dateValue = value
+        picker.dateValue = value!
         picker.datePickerElements = .yearMonthDay
         picker.layer?.cornerRadius = 10
         picker.layer?.masksToBounds = true
@@ -102,7 +103,7 @@ public struct PlusDatePicker: NSViewRepresentable {
         guard nsView.dateValue != value else {
             return
         }
-        nsView.dateValue = value
+        nsView.dateValue = value!
     }
     
     public func makeCoordinator() -> Coordinator {
