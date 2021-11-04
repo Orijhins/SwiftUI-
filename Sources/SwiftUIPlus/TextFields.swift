@@ -122,7 +122,8 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         }
         
         // This should stop the NSTextfield to format Numbers when it's not needed
-        guard nsView.window?.firstResponder != nsView else { return }
+        guard let textView = nsView.window?.firstResponder as? NSTextView,
+              textView.superview?.superview != nsView else { return }
         
         if let formatter = formatter {
             guard nsView.stringValue != formatter.string(for: value) else {
@@ -168,8 +169,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         // MARK: NSTextFieldDelegate
         
         public func controlTextDidChange(_ obj: Notification) {
-            guard let textField = obj.object as? NSTextField else { return }
-            updateValue(from: textField.stringValue)
+            guard obj.object is NSTextField else { return }
             parent.onChange?()
         }
 
