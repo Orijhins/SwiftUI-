@@ -120,6 +120,10 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                 self.focusTag = 0
             }
         }
+        
+        // This should stop the NSTextfield to format Numbers when it's not needed
+        guard nsView.window?.firstResponder != nsView else { return }
+        
         if let formatter = formatter {
             guard nsView.stringValue != formatter.string(for: value) else {
                 return
