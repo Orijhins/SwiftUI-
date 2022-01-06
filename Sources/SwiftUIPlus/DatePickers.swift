@@ -100,7 +100,7 @@ public struct PlusDatePicker: NSViewRepresentable {
                 self.focusTag = 0
             }
         }
-        guard nsView.dateValue != value else {
+        guard value != nil, nsView.dateValue != value else {
             return
         }
         nsView.dateValue = value!
