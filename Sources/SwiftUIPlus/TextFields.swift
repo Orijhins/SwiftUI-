@@ -89,7 +89,6 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
             formatter != nil
                 ? formatter!.string(for: value) ?? ""
                 : (value != nil ? "\(value!)" : "")
-        textField.formatter = formatter
         textField.placeholderString = placeholder
         textField.delegate = context.coordinator
         textField.tag = tag
