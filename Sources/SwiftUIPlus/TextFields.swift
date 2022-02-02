@@ -181,17 +181,31 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         
         private func updateValue(from string: String) {
             if let form = parent.formatter {
-                let _tar_pointer = UnsafeMutablePointer<AnyObject>.allocate(capacity: 1)
-                let _err_pointer = UnsafeMutablePointer<NSString>.allocate(capacity: 1)
-                defer {
-                    _tar_pointer.deallocate()
-                    _err_pointer.deallocate()
-                }
-                let tar: AutoreleasingUnsafeMutablePointer<AnyObject?>? = AutoreleasingUnsafeMutablePointer(_tar_pointer)
-                let error: AutoreleasingUnsafeMutablePointer<NSString?>? = AutoreleasingUnsafeMutablePointer(_err_pointer)
-                form.getObjectValue(tar, for: string, errorDescription: error)
-                if error?.pointee == nil {
-                    parent.value = tar?.pointee as? Value
+                switch form {
+                case is NumberFormatter:
+                    let nf = form as! NumberFormatter
+                    if let d = Double.init(string),
+                       let v = nf.string(from: NSNumber.init(value: d)) {
+                        parent.value = nf.number(from: v) as? Value
+                    }
+                case is DateFormatter:
+                    let df = form as! DateFormatter
+                    if let d = df.date(from: string) {
+                        parent.value = d as? Value
+                    }
+                default:
+                    let _tar_pointer = UnsafeMutablePointer<AnyObject>.allocate(capacity: 1)
+                    let _err_pointer = UnsafeMutablePointer<NSString>.allocate(capacity: 1)
+                    defer {
+                        _tar_pointer.deallocate()
+                        _err_pointer.deallocate()
+                    }
+                    let tar: AutoreleasingUnsafeMutablePointer<AnyObject?>? = AutoreleasingUnsafeMutablePointer(_tar_pointer)
+                    let error: AutoreleasingUnsafeMutablePointer<NSString?>? = AutoreleasingUnsafeMutablePointer(_err_pointer)
+                    form.getObjectValue(tar, for: string, errorDescription: error)
+                    if error?.pointee == nil {
+                        parent.value = tar?.pointee as? Value
+                    }
                 }
             } else {
                 switch parent.value {
