@@ -10,8 +10,8 @@ import SwiftUI
 
 #if os(macOS)
 @available(macOS 10.15, *)
-public struct PlusMultilineTextField: NSViewRepresentable {
-    public typealias NSViewType = NSScrollView
+internal struct PlusMultilineTextField: NSViewRepresentable {
+    typealias NSViewType = NSScrollView
     
     private var theTextView = NSTextView.scrollableTextView()
     
@@ -33,7 +33,7 @@ public struct PlusMultilineTextField: NSViewRepresentable {
     
     @State fileprivate var didFocus = false
     
-    public init(
+    init(
         _ value: Binding<NSAttributedString?>,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
@@ -46,7 +46,7 @@ public struct PlusMultilineTextField: NSViewRepresentable {
         self.onCommit = onCommit
     }
     
-    public init(
+    init(
         _ value: Binding<NSAttributedString>,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
@@ -59,7 +59,7 @@ public struct PlusMultilineTextField: NSViewRepresentable {
         self.onCommit = onCommit
     }
     
-    public func makeNSView(context: Context) -> NSScrollView {
+    func makeNSView(context: Context) -> NSScrollView {
         let textView = theTextView.documentView as! NSTextView
         textView.backgroundColor = .clear
         textView.isEditable = true
@@ -74,7 +74,7 @@ public struct PlusMultilineTextField: NSViewRepresentable {
         return theTextView
     }
     
-    public func updateNSView(_ nsView: NSScrollView, context: Context) {
+    func updateNSView(_ nsView: NSScrollView, context: Context) {
         if autoFocus && !didFocus {
             NSApplication.shared.mainWindow?.perform(
                 #selector(NSApplication.shared.mainWindow?.makeFirstResponder(_:)),
@@ -106,16 +106,16 @@ public struct PlusMultilineTextField: NSViewRepresentable {
         view.textStorage?.setAttributedString(value ?? NSAttributedString())
     }
     
-    public func makeCoordinator() -> Coordinator {
+    func makeCoordinator() -> Coordinator {
         Coordinator(with: self)
     }
     
-    public class Coordinator: NSObject, NSTextViewDelegate {
+    class Coordinator: NSObject, NSTextViewDelegate {
         var parent: PlusMultilineTextField
         
         var selectedRanges: [NSValue] = []
 
-        public init(with parent: PlusMultilineTextField) {
+        init(with parent: PlusMultilineTextField) {
             self.parent = parent
 //            super.init()
 //
@@ -136,12 +136,12 @@ public struct PlusMultilineTextField: NSViewRepresentable {
 
         // MARK: NSTextViewDelegate
         
-        public func textDidBeginEditing(_ notification: Notification) {
+        func textDidBeginEditing(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             updateValue(from: textView.attributedString())
         }
         
-        public func textDidEndEditing(_ notification: Notification) {
+        func textDidEndEditing(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             updateValue(from: textView.attributedString())
             parent.onCommit?()
@@ -151,12 +151,12 @@ public struct PlusMultilineTextField: NSViewRepresentable {
             parent.value = attributedString
         }
         
-        public func textViewDidChangeSelection(_ notification: Notification) {
+        func textViewDidChangeSelection(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             self.selectedRanges = textView.selectedRanges
         }
         
-        public func textDidChange(_ notification: Notification) {
+        func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             updateValue(from: textView.attributedString())
             self.selectedRanges = textView.selectedRanges
@@ -183,6 +183,32 @@ public struct PlusTextView: View {
     public var onChange: (() -> Void)? = nil
     ///OPTIONAL: The Delegate Action to execute when Editing ends
     public var onCommit: (() -> Void)? = nil
+    
+    public init(
+        _ value: Binding<NSAttributedString?>,
+        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
+    ) {
+        self._value = value
+        self.autoFocus = autoFocus
+        self.tag = tag
+        self._focusTag = focusTag
+        self.onChange = onChange
+        self.onCommit = onCommit
+    }
+    
+    public init(
+        _ value: Binding<NSAttributedString>,
+        autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
+    ) {
+        self._value = Binding(value)
+        self.autoFocus = autoFocus
+        self.tag = tag
+        self._focusTag = focusTag
+        self.onChange = onChange
+        self.onCommit = onCommit
+    }
     
     public var body: some View {
         ZStack(alignment: .topLeading) {
