@@ -63,7 +63,7 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
         let textView = theTextView.documentView as! NSTextView
         textView.isEditable = true
         textView.isRichText = true
-        theTextView.backgroundColor = .clear
+        textView.backgroundColor = .clear
         theTextView.borderType = .bezelBorder
         theTextView.hasHorizontalScroller = false
         theTextView.wantsLayer = true
@@ -230,7 +230,6 @@ public struct PlusTextView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .overlay(RoundedRectangle(cornerRadius: 5)
                             .stroke(colorScheme == .dark ? Color.gray : Color.clear, lineWidth: 0.25))
-                .shadow(radius: 2)
                 .shadow(color: colorScheme == .dark ? .black.opacity(0.3) : .clear, radius: 0.5, x: 0, y: 0.5)
         }
     }
