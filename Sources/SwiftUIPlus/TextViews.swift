@@ -61,10 +61,9 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
     
     func makeNSView(context: Context) -> NSScrollView {
         let textView = theTextView.documentView as! NSTextView
-        textView.backgroundColor = .clear
         textView.isEditable = true
         textView.isRichText = true
-        theTextView.borderType = .lineBorder
+        theTextView.borderType = .bezelBorder
         theTextView.hasHorizontalScroller = false
         theTextView.wantsLayer = true
         theTextView.layer?.cornerRadius = 5
@@ -166,6 +165,8 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
 }
 
 public struct PlusTextView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     //The Value held and displayed by the TextView
     @Binding public var value: NSAttributedString?
     
@@ -224,6 +225,12 @@ public struct PlusTextView: View {
             }
             PlusMultilineTextField($value, autoFocus: autoFocus, tag: tag, focusTag: $focusTag, onChange: onChange, onCommit: onCommit)
                 .frame(maxWidth: .infinity, minHeight: 50, maxHeight: .infinity)
+                .background(colorScheme == .dark ? Color.gray.opacity(0.05) : Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
+                .overlay(RoundedRectangle(cornerRadius: 5)
+                            .stroke(colorScheme == .dark ? Color.gray : Color.clear, lineWidth: 0.25))
+                .shadow(radius: 2)
+                .shadow(color: colorScheme == .dark ? .black.opacity(0.3) : .clear, radius: 0.5, x: 0, y: 0.5)
         }
     }
 }
