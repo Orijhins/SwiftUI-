@@ -18,7 +18,7 @@ import SwiftUI
 public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     public typealias NSViewType = NSTextField
 
-    ///The Value hold and displayed by the TextField
+    ///The Value held and displayed by the TextField
     @Binding public var value: Value?
     ///OPTIONAL: The Formatter used by the TextField if necessary.
     ///Highly recommended if using non-StringProtocol Value
@@ -28,11 +28,11 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     ///OPTIONAL: Set this to true if you want the TextField to be autofocused
     ///when the View is displayed or becomes active. Default is false
     public var autoFocus = false
-    ///OPTIONAL: The TextField's Tag, used to navigate through TextFields
+    ///OPTIONAL: The TextField's Tag, used to navigate through PlusViews
     ///when Tab is pressed e.g. Default is 0
     public var tag: Int = 0
-    ///The View's focusTag, which is shared between TextFields. Update this
-    ///one to navigate to a TextField with the same tag
+    ///The View's focusTag, which is shared between PlusViews. Update this
+    ///one to navigate to a PlusView with the same tag
     @Binding public var focusTag: Int
     ///OPTIONAL: The Delegate Action to execute whenever the Value changes
     public var onChange: (() -> Void)?
