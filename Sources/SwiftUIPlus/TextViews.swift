@@ -63,6 +63,7 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
         let textView = theTextView.documentView as! NSTextView
         textView.isEditable = true
         textView.isRichText = true
+        theTextView.backgroundColor = .clear
         theTextView.borderType = .bezelBorder
         theTextView.hasHorizontalScroller = false
         theTextView.wantsLayer = true
