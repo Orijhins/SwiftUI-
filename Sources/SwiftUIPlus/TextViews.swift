@@ -10,9 +10,8 @@ import SwiftUI
 
 #if os(macOS)
 @available(macOS 10.15, *)
-internal struct PlusMultilineTextField: NSViewRepresentable {
-    
-    typealias NSViewType = NSScrollView
+public struct PlusMultilineTextField: NSViewRepresentable {
+    public typealias NSViewType = NSScrollView
     
     private var theTextView = NSTextView.scrollableTextView()
     
@@ -60,7 +59,7 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
         self.onCommit = onCommit
     }
     
-    func makeNSView(context: Context) -> NSScrollView {
+    public func makeNSView(context: Context) -> NSScrollView {
         let textView = theTextView.documentView as! NSTextView
         textView.backgroundColor = .clear
         textView.isEditable = true
@@ -75,7 +74,7 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
         return theTextView
     }
     
-    func updateNSView(_ nsView: NSScrollView, context: Context) {
+    public func updateNSView(_ nsView: NSScrollView, context: Context) {
         if autoFocus && !didFocus {
             NSApplication.shared.mainWindow?.perform(
                 #selector(NSApplication.shared.mainWindow?.makeFirstResponder(_:)),
@@ -107,11 +106,11 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
         view.textStorage?.setAttributedString(value ?? NSAttributedString())
     }
     
-    func makeCoordinator() -> Coordinator {
+    public func makeCoordinator() -> Coordinator {
         Coordinator(with: self)
     }
     
-    class Coordinator: NSObject, NSTextViewDelegate {
+    public class Coordinator: NSObject, NSTextViewDelegate {
         var parent: PlusMultilineTextField
         
         var selectedRanges: [NSValue] = []
@@ -137,12 +136,12 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
 
         // MARK: NSTextViewDelegate
         
-        func textDidBeginEditing(_ notification: Notification) {
+        public func textDidBeginEditing(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             updateValue(from: textView.attributedString())
         }
         
-        func textDidEndEditing(_ notification: Notification) {
+        public func textDidEndEditing(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             updateValue(from: textView.attributedString())
             parent.onCommit?()
@@ -152,12 +151,12 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
             parent.value = attributedString
         }
         
-        func textViewDidChangeSelection(_ notification: Notification) {
+        public func textViewDidChangeSelection(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             self.selectedRanges = textView.selectedRanges
         }
         
-        func textDidChange(_ notification: Notification) {
+        public func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             updateValue(from: textView.attributedString())
             self.selectedRanges = textView.selectedRanges
