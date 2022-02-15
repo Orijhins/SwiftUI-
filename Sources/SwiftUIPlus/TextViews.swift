@@ -186,10 +186,12 @@ public struct PlusTextView: View {
     
     public init(
         _ value: Binding<NSAttributedString?>,
+        placeholder: String? = nil,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
     ) {
         self._value = value
+        self.placeholder = placeholder
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
@@ -199,10 +201,12 @@ public struct PlusTextView: View {
     
     public init(
         _ value: Binding<NSAttributedString>,
+        placeholder: String? = nil,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
     ) {
         self._value = Binding(value)
+        self.placeholder = placeholder
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
