@@ -34,7 +34,7 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
     
     @State fileprivate var didFocus = false
     
-    init(
+    public init(
         _ value: Binding<NSAttributedString?>,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
@@ -47,7 +47,7 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
         self.onCommit = onCommit
     }
     
-    init(
+    public init(
         _ value: Binding<NSAttributedString>,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil
