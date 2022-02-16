@@ -64,10 +64,10 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
         textView.isEditable = true
         textView.isRichText = true
         textView.backgroundColor = .clear
-        theTextView.borderType = .bezelBorder
+        textView.textContainerInset = NSSize(width: 4, height: 4)
+        theTextView.drawsBackground = false
+        theTextView.borderType = .noBorder
         theTextView.hasHorizontalScroller = false
-        theTextView.wantsLayer = true
-        theTextView.layer?.cornerRadius = 5
         theTextView.focusRingType = .default
         textView.delegate = context.coordinator
         textView.textStorage?.setAttributedString(value ?? NSAttributedString())
@@ -117,22 +117,22 @@ internal struct PlusMultilineTextField: NSViewRepresentable {
 
         init(with parent: PlusMultilineTextField) {
             self.parent = parent
-//            super.init()
-//
-//            NotificationCenter.default.addObserver(
-//                self,
-//                selector: #selector(handleAppDidBecomeActive(notification:)),
-//                name: NSApplication.didBecomeActiveNotification,
-//                object: nil)
+            super.init()
+
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleAppDidBecomeActive(notification:)),
+                name: NSApplication.didBecomeActiveNotification,
+                object: nil)
         }
 
-//        @objc func handleAppDidBecomeActive(notification: Notification) {
-//            if parent.autoFocus && !parent.didFocus {
-//                DispatchQueue.main.asyncAfter(deadline: .now() + .nanoseconds(1)) {
-//                    self.parent.didFocus = false
-//                }
-//            }
-//        }
+        @objc func handleAppDidBecomeActive(notification: Notification) {
+            if parent.autoFocus && !parent.didFocus {
+                DispatchQueue.main.asyncAfter(deadline: .now() + .nanoseconds(1)) {
+                    self.parent.didFocus = false
+                }
+            }
+        }
 
         // MARK: NSTextViewDelegate
         
@@ -216,21 +216,31 @@ public struct PlusTextView: View {
         self.onCommit = onCommit
     }
     
+    internal func get() -> NSAttributedString {
+        return value ?? NSAttributedString()
+    }
+    
+    internal func set(_ attributedString: NSAttributedString) {
+        value = NSAttributedString(attributedString: attributedString)
+    }
+    
     public var body: some View {
         ZStack(alignment: .topLeading) {
-            if placeholder != nil && (value == nil || value?.string.isEmpty ?? true ) {
-                Text(placeholder!)
-                    .foregroundColor(.gray)
-                    .padding(.leading, 6)
-                    .opacity(0.8)
-            }
-            PlusMultilineTextField($value, autoFocus: autoFocus, tag: tag, focusTag: $focusTag, onChange: onChange, onCommit: onCommit)
+            PlusMultilineTextField(Binding(get: { return get() }, set: { set($0) }), autoFocus: autoFocus, tag: tag, focusTag: $focusTag, onChange: onChange, onCommit: onCommit)
                 .frame(maxWidth: .infinity, minHeight: 50, maxHeight: .infinity)
                 .background(colorScheme == .dark ? Color.gray.opacity(0.05) : Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .overlay(RoundedRectangle(cornerRadius: 5)
-                            .stroke(colorScheme == .dark ? Color.gray : Color.clear, lineWidth: 0.25))
-                .shadow(color: colorScheme == .dark ? .black.opacity(0.3) : .clear, radius: 0.5, x: 0, y: 0.5)
+                            .stroke(Color.gray, lineWidth: colorScheme == .light ? 0.25 : 0.5))
+                .shadow(color: colorScheme == .light ? .black.opacity(0.3) : .white.opacity(0.3), radius: 0.05, x: 0, y: 0.125)
+            
+            if placeholder != nil && (value == nil || value?.string.isEmpty ?? true ) {
+                Text(placeholder!)
+                    .foregroundColor(.primary)
+                    .padding(.leading, 8)
+                    .padding(.top, 2)
+                    .opacity(0.3)
+            }
         }
     }
 }
