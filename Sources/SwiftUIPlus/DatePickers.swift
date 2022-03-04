@@ -24,6 +24,10 @@ public struct PlusDatePicker: NSViewRepresentable {
     ///The View's focusTag, which is shared between PlusViews. Update this
     ///one to navigate to a PlusView with the same tag
     @Binding public var focusTag: Int
+    /// OPTIONAL: The maximum Date of the DatePicker
+    public var max: Date?
+    /// OPTIONAL: The minimum Date of the DatePicker
+    public var min: Date?
     ///OPTIONAL: The Delegate Action to execute whenever the Value changes
     public var onChange: (() -> Void)?
     ///OPTIONAL: The Delegate Action to execute when the Tab Key is pressed
@@ -36,6 +40,7 @@ public struct PlusDatePicker: NSViewRepresentable {
     public init(
         _ value: Binding<Date>,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        max: Date? = nil, min: Date? = nil,
         onChange: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
@@ -43,6 +48,8 @@ public struct PlusDatePicker: NSViewRepresentable {
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
+        self.max = max
+        self.min = min
         self.onChange = onChange
         self.onTabKeyStroke = onTabKeyStroke
         self.onBackTabKeyStroke = onBackTabKeyStroke
@@ -51,6 +58,7 @@ public struct PlusDatePicker: NSViewRepresentable {
     public init(
         _ value: Binding<Date?>,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
+        max: Date? = nil, min: Date? = nil,
         onChange: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
     ) {
@@ -58,6 +66,8 @@ public struct PlusDatePicker: NSViewRepresentable {
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
+        self.max = max
+        self.min = min
         self.onChange = onChange
         self.onTabKeyStroke = onTabKeyStroke
         self.onBackTabKeyStroke = onBackTabKeyStroke
@@ -73,7 +83,12 @@ public struct PlusDatePicker: NSViewRepresentable {
         picker.delegate = context.coordinator
         picker.tag = tag
         picker.isBezeled = true
-        picker.maxDate = Date()
+        if let max = self.max {
+            picker.maxDate = max
+        }
+        if let min = self.min {
+            picker.minDate = min
+        }
         return picker
     }
     
