@@ -25,6 +25,10 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     public var formatter: Formatter?
     ///The Placeholder to display if the Value is empty
     public var placeholder: String
+    ///The minimum Date that the TextField allows (used in case you want to hold a Date in the Textfield)
+    public var min: Date?
+    ///The maximum Date that the TextField allows (used in case you want to hold a Date in the Textfield)
+    public var max: Date?
     ///OPTIONAL: Set this to true if you want the TextField to be autofocused
     ///when the View is displayed or becomes active. Default is false
     public var autoFocus = false
@@ -48,6 +52,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     public init(
         _ value: Binding<Value?>,
         formatter: Formatter? = nil, placeholder: String,
+        min: Date? = nil, max: Date? = nil,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
@@ -55,6 +60,8 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         self._value = value
         self.formatter = formatter
         self.placeholder = placeholder
+        self.min = min
+        self.max = max
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
@@ -67,6 +74,7 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
     public init(
         _ value: Binding<Value>,
         formatter: Formatter? = nil, placeholder: String,
+        min: Date? = nil, max: Date? = nil,
         autoFocus: Bool = false, tag: Int = 0, focusTag: Binding<Int>,
         onChange: (() -> Void)? = nil, onCommit: (() -> Void)? = nil,
         onTabKeyStroke: (() -> Void)? = nil, onBackTabKeyStroke: (() -> Void)? = nil
@@ -74,6 +82,8 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         self._value = Binding(value)
         self.formatter = formatter
         self.placeholder = placeholder
+        self.min = min
+        self.max = max
         self.autoFocus = autoFocus
         self.tag = tag
         self._focusTag = focusTag
@@ -190,7 +200,13 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                     }
                 case is DateFormatter:
                     let df = form as! DateFormatter
-                    if let d = df.date(from: string) {
+                    if var d = df.date(from: string) {
+                        if let min = parent.min {
+                            d = d > min ? d : min
+                        }
+                        if let max = parent.max {
+                            d = d < max ? d : max
+                        }
                         parent.value = d as? Value
                     }
                 default:
