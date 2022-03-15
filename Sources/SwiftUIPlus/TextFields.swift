@@ -180,6 +180,9 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         
         public func controlTextDidChange(_ obj: Notification) {
             guard obj.object is NSTextField else { return }
+            if parent.formatter == nil {
+                updateValue(from: (obj.object as! NSTextField).stringValue)
+            }
             parent.onChange?()
         }
 
