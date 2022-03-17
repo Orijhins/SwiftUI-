@@ -199,7 +199,9 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
                     let nf = form as! NumberFormatter
                     if let d = Double.init(string),
                        let v = nf.string(from: NSNumber.init(value: d)) {
-                        parent.value = nf.number(from: v) as? Value
+                        let val = nf.number(from: v)
+                        let dn: NSDecimalNumber = NSDecimalNumber(decimal: val?.decimalValue ?? 0.0)
+                        parent.value = dn as? Value
                     }
                 case is DateFormatter:
                     let df = form as! DateFormatter
