@@ -136,14 +136,8 @@ public struct PlusTextField<Value>: NSViewRepresentable where Value: Hashable {
         }
         
         if let formatter = formatter {
-            guard nsView.stringValue != formatter.string(for: value) else {
-                return
-            }
             nsView.stringValue = formatter.string(for: value) ?? ""
         } else {
-            guard nsView.stringValue != value as? String ?? "" else {
-                return
-            }
             nsView.stringValue = value != nil ? "\(value!)" : ""
         }
     }
